@@ -138,9 +138,13 @@ const InitializeAI = async ()=>{
 
 const onKeyDown = (e)=>{
 	if(e.key === " "){
-		m_bSimulation = !m_bSimulation;		
-		update();
+		toggleMode()
 	}
+}
+
+const toggleMode = () =>{
+	m_bSimulation = !m_bSimulation;		
+	update();
 }
 
 const update = () => {
@@ -228,6 +232,8 @@ const inference = async () =>{
 
 	m_calculation = true;
 	let ctx = m_canvas.getContext("2d");
+
+	if(m_videoContainer === null) return;
 	ctx.drawImage(m_videoContainer, 0, 0, m_canvas.width, m_canvas.height);        
 	
 	let imageData =  Float32Array.from(ctx.getImageData(0, 0, 256, 256).data);
@@ -291,48 +297,42 @@ const FileLeave = (e) =>{
 	m_bFileDrop = false;
 }
 </script>
+
+
+<div class="renderer" bind:this={m_rendererContainer}		
+		style="--theme-background1: rgb({m_background1[0]}, {m_background1[1]}, {m_background1[2]} );
+			--theme-background2 : rgb({m_background2[0]}, {m_background2[1]}, {m_background2[2]});">		
+</div>
+
 <video class="video" autoplay muted loop bind:this={m_videoContainer}>
 	<source src="resources/output.mp4" type="video/mp4">
 	<track kind="captions">
 </video>
 
-<div class="renderer" bind:this={m_rendererContainer}
-		on:dragover={e=>{FileEnter(e)}}
-		on:drop={e=>{FileDrop(e)}}
-		style="--theme-background1: rgb({m_background1[0]}, {m_background1[1]}, {m_background1[2]} );
-			--theme-background2 : rgb({m_background2[0]}, {m_background2[1]}, {m_background2[2]});">	
-		
-	<div class="message"> 
-		<div>Press 'space' to </div>	
-		<div>{m_bSimulation ? 
-			"STOP":
-			"ANIMATE"}</div>	
-	</div>
 
-	{#if m_bFileDrop}
-	<div class="drop-handler" on:dragleave={e=>{FileLeave(e)}}>
-		<h1>Drop draped mesh .obj file</h1>
-	</div>		
-	{/if}	
+<div class="message" on:click={e=>{toggleMode()}}> 
+	<div>Click to </div>	
+	<div>{m_bSimulation ? 
+		"STOP":
+		"ANIMATE"}</div>	
 </div>
 
 <style>
 
 .video{
 	position : absolute;
-	top : 0;
-	left : 0;
-	width : 50%;
-	height : 100%;
+	top : 10%;
+	left : 10%;
+	width : 250px;
+	height : 250px;
 }
 
 .renderer{
 	background: linear-gradient(var(--theme-background1), var(--theme-background2));
 	position : absolute;
 	top : 0;
-	left : 50%;
-
-	width : 50%;
+	left : 0;
+	width : 100%;
 	height : 100%;
 
 	display: flex;
@@ -343,30 +343,23 @@ const FileLeave = (e) =>{
 .message{
 	position : absolute;
 	top : 10px;
-	left : 40px;	
+	left : calc(50% + 40px) ;	
 	
 	display: flex;	
 	flex-direction: column;	
 	justify-content: center;	
+	
+	background-color: black;
+}
+
+.message:hover{
+	background-color: red;
 }
 
 .message > div{
-	background-color: black;
 	padding : 5px;
 	user-select: none;
 	display: flex;
 	text-align: center;
 }
-
-
-.drop-handler {
-		position : absolute;
-		width : 100%;
-		height : 100%;
-		background : rgba(52, 12, 250, 0.5);
-
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
 </style>
